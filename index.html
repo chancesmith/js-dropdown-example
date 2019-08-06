@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+
+<head>
+    <style>
+        .table-cell {
+            height: 40px;
+            position: relative;
+        }
+
+        .dropdown-body {
+            position: relative;
+        }
+
+        .dropdown-body ul {
+            padding: 0;
+            list-style: none;
+            background: #444;
+            color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .dropdown-body ul li {
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+
+        .dropdown-body ul li:hover {
+            font-weight: bold;
+        }
+
+        .dropdown-header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .dropdown-body {
+            display: none;
+        }
+
+        .dropdown-body-showing {
+            display: block;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Dropdown Menu</h1>
+    <table style="width: 80%; border: 5px solid #ccc;margin: 20px 0 0 0;">
+    </table>
+    <div id=dropdown-template style="display: none;">
+        <div class=dropdown-header><span>#some.tag.here.gets.replaced</span> <span
+                class=dropdown-trigger>chevron_down</span></div>
+        <div class=dropdown-body></div>
+    </div>
+    <script>
+        //////
+        // add dropdown to each table-cell
+        //////
+        // trigger dropdown
+        const toggleDropdown = function (dropdownTrigger) {
+            var addClass = true;
+            const thisDropdown = dropdownTrigger.parentElement.parentElement.querySelector('.dropdown-body')
+            if (thisDropdown.classList.contains('dropdown-body-showing')) addClass = false;
+            Array.prototype.slice.call(document.querySelectorAll('.dropdown-body-showing')).map(dd => dd.classList
+                .remove('dropdown-body-showing'))
+            if (addClass) thisDropdown.classList.add('dropdown-body-showing')
+        };
+        // add dropdown options to a <ul/>
+        const createDropdownOptions = function (options) {
+            const ul = document.createElement('ul');
+            options.map(option => {
+                const li = document.createElement('li')
+                li.innerHTML = option.text
+                li.onclick = function () {
+                    option.function()
+                    this.parentElement.parentElement.classList.remove('dropdown-body-showing')
+                }
+                ul.appendChild(li)
+            })
+            return ul;
+        }
+        // tag list
+        const tags = ['#short.tag', '#longer.tag'];
+        const table = document.querySelector('table')
+        tags.map(tag => {
+            // similar to how tag rows are made
+            const trow = table.insertRow()
+            trow.classList.add('dropdown', 'table-cell')
+            const hideCell = trow.insertCell(-1);
+            const tagName = trow.insertCell(-1);
+            const moreCell = trow.insertCell(-1);
+            tagName.setAttribute('data-tagname', tag)
+            hideCell.innerHTML = 'hide';
+            const dropdownTemp = document.getElementById('dropdown-template').cloneNode(true).childNodes;
+            Array.prototype.slice.call(dropdownTemp).map(dropdownEl => tagName.appendChild(dropdownEl));
+            tagName.querySelector('.dropdown-header span').innerHTML = tag;
+            // add dropown options to menu
+            const tagOptions = [{
+                text: 'select',
+                function: function () {
+                    console.log('select tag', tag)
+                }
+            }, {
+                text: 'filter',
+                function: function () {
+                    console.log('filter tag', tag)
+                }
+            }, {
+                text: 'edit',
+                function: function () {
+                    console.log('edit tag', tag)
+                }
+            }, {
+                text: 'remove tag',
+                function: function () {
+                    console.log('remove tag', tag)
+                }
+            }]
+            const dropdownBody = tagName.querySelector('.dropdown-body')
+            dropdownBody.appendChild(createDropdownOptions(tagOptions))
+            // add dropdown show logic
+            tagName.querySelector('.dropdown-header .dropdown-trigger').onclick = function () {
+                toggleDropdown(this)
+            };
+        })
+    </script>
+</body>
+
+</html>
